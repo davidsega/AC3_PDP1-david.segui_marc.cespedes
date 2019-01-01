@@ -91,7 +91,7 @@ bool beat = LOW;
 
 int x_old, y_old, x_new, y_new;
 
-
+int giro_x,giro_y,giro_z;
 
 /**
 Put the nRF8001 setup in the RAM of the nRF8001.
@@ -253,6 +253,9 @@ void LsPeriferics(){
     Serial.print(" Z: ");
     Serial.println((int)sensor_g.gyroData.z);
     Serial.println("");
+    giro_x =(int)sensor_g.gyroData.x;
+    giro_y =(int)sensor_g.gyroData.y;
+    giro_z =(int)sensor_g.gyroData.z;
     }
   
 
@@ -1063,10 +1066,10 @@ uint8_t stringIndex = 0;      //Initialize the index to store incoming chars
 void loop() {
   
   //Process any ACI commands or events
-  aci_loop();
-
-  Motoreta.LsMtMotor();        // AFEGIT
-
+  //aci_loop();
+  desplazamiento();
+//  Motoreta.LsMtMotor();        // AFEGIT
+  
   LsPeriferics();
 /*
   // print the string when a newline arrives:
@@ -1144,6 +1147,81 @@ void serialEvent() {
     }
   }
 }
+void desplazamiento(){
+  //Serial.print(F("Pipe Number: "));
+        //Serial.println(aci_evt->params.data_received.rx_data.pipe_number, DEC);
 
+char Opcode;
+char Velocitat;
+char Acceleracio;
+char Gir;
+float Lsp,Rsp;
+float Den = 175.0;
+          //Serial.print(F(" Data(Hex) : "));
 
+ 
+//Serial.println("rebent trama");
+// ------>
+/*
+/Serial.println(uart_buffer[0],HEX);
+Serial.println(uart_buffer[1],HEX);
+Serial.println(uart_buffer[2],HEX);
+Serial.println(uart_buffer[3],HEX);
+Serial.println(uart_buffer[4],HEX);
+*/
+          // AQUI SE SALTA QUAN ES REP TRAMA
+          Opcode = uart_buffer[1];
+          //if (uart_buffer[1]!=0 ) 
+          Velocitat = uart_buffer[2];
+          Acceleracio = uart_buffer[3];
+          Gir = uart_buffer[4];
+//Serial.println(Velocitat,HEX);
+//Serial.println(Gir,HEX);
+          if (Velocitat>100) Velocitat=100;
+          if (Velocitat<-100) Velocitat=-100;
+          if (Gir==0) {
+            Rsp=Velocitat;
+            Lsp=Velocitat;
+          }
+          if (Gir>0) {  //
+            Rsp = Velocitat*(1+Gir/Den);
+            if (Rsp>100.0) Rsp=100.0;
+            if (Rsp<-100.0) Rsp=-100.0;
+            Lsp = Rsp*(1-2*Gir/Den);
+          }
+          if (Gir<0) {
+            Lsp = Velocitat*(1-Gir/Den);
+            if (Lsp>100.0) Lsp=100.0;
+            if (Lsp<-100.0) Lsp=-100.0;
+            Rsp = Lsp*(1+2*Gir/Den);
+          }
+//Serial.print(Lsp,DEC); //Marcos has commented this line
+//Serial.print(" ");
+//Serial.println(Rsp,DEC);
+       Lsp = 10;
+       Rsp = 10;
+         
+          Motoreta.LsMtMovement(Lsp,Rsp,1);
+//          LsMtMando(Velocitat*(1-Gir/100.0),Velocitat*(1+Gir/100.0),1);
+//          LsMtMando(Velocitat,Velocitat,1);
+          
+// ------>
 
+    //      Serial.println(F(""));
+          if (lib_aci_is_pipe_available(&aci_state, PIPE_UART_OVER_BTLE_UART_TX_TX))
+          {
+            /*Do this to test the loopback otherwise comment it out
+            */
+            /*
+            if (!uart_tx(&uart_buffer[0], aci_evt->len - 2))
+            {
+              Serial.println(F("UART loopback failed"));
+            }
+            else
+            {
+              Serial.println(F("UART loopback OK"));
+            }
+            */
+          }
+      
+}
