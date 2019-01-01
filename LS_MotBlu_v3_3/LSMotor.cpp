@@ -460,8 +460,7 @@ void LSMt::LsMtMotor(void) {
   static float novaL,novaR;
 
   ENC_Motor();
-  if (MT.actiu==0) state=1;
-  if (MT.actiu==-1) state=50;
+  if (MT.actiu==-1) state=1;
   switch(state) {
     case 0: // obtenir timer
             state++;
@@ -727,7 +726,7 @@ int LSMt::LsMtHiHaOrdreActiva(void) {
 
 // CONTROL del MANDO
 void LSMt::LsMtMando(float LeftSpeed,float RightSpeed,int push) {
-  if (push==1) {
+  if (push==0) {
     MT.actiu = -1;
     digitalWrite(RWenable,HIGH);
     digitalWrite(LWenable,HIGH);
@@ -755,6 +754,36 @@ void LSMt::LsMtMando(float LeftSpeed,float RightSpeed,int push) {
     MT.actiu=0;
   }
   ticsMando=millis();
+}
+
+void LSMt::LsMtMovement(float LeftSpeed,float RightSpeed,int push) {
+  if (push==1) {
+    MT.actiu = -1;
+    digitalWrite(RWenable,HIGH);
+    digitalWrite(LWenable,HIGH);
+    if (RightSpeed>=0) {
+      digitalWrite(RWfront,FRONT);
+      Rspeed = MtVelocitat(RightSpeed*MaxTicsF/100.0,'R');
+    } else {
+      digitalWrite(RWfront,BACK);
+      Rspeed = MtVelocitat(RightSpeed*MaxTicsB/100.0,'R');
+    }
+    if (LeftSpeed>=0) {
+      digitalWrite(LWfront,FRONT);
+      Lspeed = MtVelocitat(LeftSpeed*MaxTicsF/100.0,'L');
+    } else {
+      digitalWrite(LWfront,BACK);
+      Lspeed = MtVelocitat(LeftSpeed*MaxTicsB/100.0,'L');
+    }
+//Lspeed=fabs(LeftSpeed);
+//Rspeed=fabs(RightSpeed);
+    OCR4A=Rspeed;
+    OCR4B=Lspeed;
+  } else {
+    digitalWrite(RWenable,LOW);
+    digitalWrite(LWenable,LOW);
+    MT.actiu=0;
+  }
 }
 
 // RECTE
@@ -1032,5 +1061,3 @@ void LSMt::LsMtFastAutocalibrate(void) {
   digitalWrite(RWenable,LOW);
   delay(500);
 }
-
-
