@@ -41,7 +41,7 @@ class LSMt {
   void begin(void);
   void LsMtMotor(void);
   void LsMtMando(float LeftSpeed,float RightSpeed,int push);
-  
+  void LsMtMovement(float LeftSpeed,float RightSpeed,int push);
  private:
   void ENC_Init(void);
   static void ISRencoderLeft(void);
@@ -72,6 +72,7 @@ class LSMt {
   void MtParaMotor(char quin);
   float MtAjustaVelocitat(float Speed,float TeoSpace,float RealSpace,float TeoSpeed,float RealSpeed,float TeoAccel,float RealAccel,float MaxSpeed);
   int LsMtHiHaOrdreActiva();
+
   void LsMtRecte(float initVeloc,float initSpace,float veloc,float space,float endVeloc,float endSpace) ;
   void LsMtDreta(float radi,float initVeloc,float initGraus,float veloc,float graus,float endVeloc,float endGraus);
   void LsMtEsquerra(float radi,float initVeloc,float initGraus,float veloc,float graus,float endVeloc,float endGraus) ;
@@ -85,4 +86,3 @@ class LSMt {
 
 
 #endif
-
